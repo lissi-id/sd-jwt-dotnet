@@ -7,10 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SD-JWT", "src\SD-JWT\SD-JWT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SD-JWT-Tests", "tests\SD-JWT-Tests\SD-JWT-Tests.csproj", "{87C106C1-68BD-4557-91B8-924A0EE78571}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SD-JWT-Askar", "src\SD-JWT-Askar\SD-JWT-Askar.csproj", "{5DC6CE59-372C-47D1-85A8-5AC6E8799A9F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SD-JWT-Askar-Tests", "tests\SD-JWT-Askar-Tests\SD-JWT-Askar-Tests.csproj", "{88F54F39-24E6-4EA1-822E-ED1811EB9C85}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,13 +24,5 @@ Global
 		{87C106C1-68BD-4557-91B8-924A0EE78571}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87C106C1-68BD-4557-91B8-924A0EE78571}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87C106C1-68BD-4557-91B8-924A0EE78571}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5DC6CE59-372C-47D1-85A8-5AC6E8799A9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5DC6CE59-372C-47D1-85A8-5AC6E8799A9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5DC6CE59-372C-47D1-85A8-5AC6E8799A9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5DC6CE59-372C-47D1-85A8-5AC6E8799A9F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{88F54F39-24E6-4EA1-822E-ED1811EB9C85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{88F54F39-24E6-4EA1-822E-ED1811EB9C85}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{88F54F39-24E6-4EA1-822E-ED1811EB9C85}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{88F54F39-24E6-4EA1-822E-ED1811EB9C85}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
