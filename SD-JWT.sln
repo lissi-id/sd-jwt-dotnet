@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SD-JWT", "src\SD-JWT\SD-JWT.csproj", "{A994927C-2A26-4A54-82E6-BA93F675CDB4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SD-JWT-Tests", "tests\SD-JWT-Tests\SD-JWT-Tests.csproj", "{87C106C1-68BD-4557-91B8-924A0EE78571}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aries-askar-dotnet", "<path to aries-askar-wrapper>\aries-askar-dotnet.csproj", "{AEA4AEA3-AA78-4D24-BC13-BD0EF931F627}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SD-JWT-Askar", "src\SD-JWT-Askar\SD-JWT-Askar.csproj", "{5DC6CE59-372C-47D1-85A8-5AC6E8799A9F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SD-JWT-Askar-Tests", "tests\SD-JWT-Askar-Tests\SD-JWT-Askar-Tests.csproj", "{88F54F39-24E6-4EA1-822E-ED1811EB9C85}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A994927C-2A26-4A54-82E6-BA93F675CDB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A994927C-2A26-4A54-82E6-BA93F675CDB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A994927C-2A26-4A54-82E6-BA93F675CDB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A994927C-2A26-4A54-82E6-BA93F675CDB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87C106C1-68BD-4557-91B8-924A0EE78571}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87C106C1-68BD-4557-91B8-924A0EE78571}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87C106C1-68BD-4557-91B8-924A0EE78571}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87C106C1-68BD-4557-91B8-924A0EE78571}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEA4AEA3-AA78-4D24-BC13-BD0EF931F627}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEA4AEA3-AA78-4D24-BC13-BD0EF931F627}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEA4AEA3-AA78-4D24-BC13-BD0EF931F627}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEA4AEA3-AA78-4D24-BC13-BD0EF931F627}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DC6CE59-372C-47D1-85A8-5AC6E8799A9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DC6CE59-372C-47D1-85A8-5AC6E8799A9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DC6CE59-372C-47D1-85A8-5AC6E8799A9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DC6CE59-372C-47D1-85A8-5AC6E8799A9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88F54F39-24E6-4EA1-822E-ED1811EB9C85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88F54F39-24E6-4EA1-822E-ED1811EB9C85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88F54F39-24E6-4EA1-822E-ED1811EB9C85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88F54F39-24E6-4EA1-822E-ED1811EB9C85}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
