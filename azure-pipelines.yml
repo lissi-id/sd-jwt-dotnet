@@ -8,6 +8,9 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  major: '0'
+  minor: '1'
+  patch: '0'
 
 steps:
 - task: UseDotNet@2
@@ -18,15 +21,23 @@ steps:
 
 - task: DotNetCoreCLI@2
   inputs:
-    command: 'restore'
-
-- task: DotNetCoreCLI@2
-  inputs:
     command: 'build'
     arguments: '--configuration $(buildConfiguration)'
   displayName: 'dotnet build $(buildConfiguration)'
 
-- task: PublishPipelineArtifact@1
+- task: NuGetCommand@2
   inputs:
-    targetPath: '$(Pipeline.Workspace)'
-    publishLocation: 'pipeline'
+    command: pack
+    packagesToPack: '**/SD-JWT.csproj'
+    packDestination: '$(Build.ArtifactStagingDirectory)'
+    versioningScheme: byPrereleaseNumber
+    majorVersion: '$(major)'
+    minorVersion: '$(minor)'
+    patchVersion: '$(patch)'
+
+- task: NuGetAuthenticate@1
+
+- task: NuGetCommand@2
+  inputs:
+    command: push
+    publishVstsFeed: 'a8209a3a-386c-408b-886a-037df8eadf21/5ecbcca4-3db8-47df-9230-c819b1d9e0ea'
