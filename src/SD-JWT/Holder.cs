@@ -1,7 +1,5 @@
-using System.Security.Cryptography;
 using Jose;
 using Jose.keys;
-using Microsoft.IdentityModel.Tokens;
 using SD_JWT.Abstractions;
 using SD_JWT.Models;
 
@@ -9,19 +7,20 @@ namespace SD_JWT;
 
 public class Holder : IHolder
 {
-    public void ReceiveCredential(string sdJwt)
+    public SdJwtDoc ReceiveCredential(string sdJwt)
     {
         /*
             1. Separate the SD-JWT and the Disclosures in the Combined Format for Issuance.
             2. Hash all of the Disclosures separately.
-            3. Find the places in the SD-JWT where the digests of the Disclosures are included. 
+            3. Find the places in the SD-JWT where the digests of the Disclosures are included.
                If any of the digests cannot be found in the SD-JWT, the Holder MUST reject the SD-JWT.
             4. Decode Disclosures and obtain plaintext of the claim values.
          */
-        var sdJwtDoc = new SdJwtDoc(sdJwt);
+        return new SdJwtDoc(sdJwt);
     }
 
-    public string CreatePresentation(SdJwtDoc sdJwt, string[] holderDisclosures, string? holderKey = null, string? nonce = null, string? audience = null)
+    public string CreatePresentation(SdJwtDoc sdJwt, string[] holderDisclosures, string? holderKey = null,
+        string? nonce = null, string? audience = null)
     {
         /*
             1. Decide which Disclosures to release to the Verifier, obtaining proper End-User consent if necessary.
@@ -36,7 +35,7 @@ public class Holder : IHolder
             if (holderDisclosures.Contains(disclosure.GetDigest()))
                 presentation += $"~{disclosure.Serialize()}";
         }
-        
+
         // Add holder binding
         presentation += "~";
 
@@ -48,10 +47,22 @@ public class Holder : IHolder
                 { "aud", "https://example.com/verifier" },
                 { "iat", "1676965944" }
             };
-            
-            byte[] x = { 4, 114, 29, 223, 58, 3, 191, 170, 67, 128, 229, 33, 242, 178, 157, 150, 133, 25, 209, 139, 166, 69, 55, 26, 84, 48, 169, 165, 67, 232, 98, 9 };
-            byte[] y = { 131, 116, 8, 14, 22, 150, 18, 75, 24, 181, 159, 78, 90, 51, 71, 159, 214, 186, 250, 47, 207, 246, 142, 127, 54, 183, 72, 72, 253, 21, 88, 53 };
-            byte[] d = { 42, 148, 231, 48, 225, 196, 166, 201, 23, 190, 229, 199, 20, 39, 226, 70, 209, 148, 29, 70, 125, 14, 174, 66, 9, 198, 80, 251, 95, 107, 98, 206 };
+
+            byte[] x =
+            {
+                4, 114, 29, 223, 58, 3, 191, 170, 67, 128, 229, 33, 242, 178, 157, 150, 133, 25, 209, 139, 166, 69,
+                55, 26, 84, 48, 169, 165, 67, 232, 98, 9
+            };
+            byte[] y =
+            {
+                131, 116, 8, 14, 22, 150, 18, 75, 24, 181, 159, 78, 90, 51, 71, 159, 214, 186, 250, 47, 207, 246,
+                142, 127, 54, 183, 72, 72, 253, 21, 88, 53
+            };
+            byte[] d =
+            {
+                42, 148, 231, 48, 225, 196, 166, 201, 23, 190, 229, 199, 20, 39, 226, 70, 209, 148, 29, 70, 125, 14,
+                174, 66, 9, 198, 80, 251, 95, 107, 98, 206
+            };
 
             var privateKey = EccKey.New(x, y, d);
             var confirmationJwt = Jose.JWT.Encode(payload, privateKey, JwsAlgorithm.ES256);
