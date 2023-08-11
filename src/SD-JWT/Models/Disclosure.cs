@@ -21,7 +21,9 @@ public class Disclosure
 
     public Disclosure(string name, object value)
     {
-        Salt = Base64UrlEncoder.Encode(RandomNumberGenerator.GetBytes(16));
+        var bytes = new byte[16];
+        RandomNumberGenerator.Create().GetBytes(new byte[16]);
+        Salt = Base64UrlEncoder.Encode(bytes);
         Name = name;
         Value = value;
     }
