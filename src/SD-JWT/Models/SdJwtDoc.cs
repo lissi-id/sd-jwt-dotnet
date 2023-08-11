@@ -20,6 +20,7 @@ public class SdJwtDoc
         _encodedSdJwt = issuedSdJwt;
         
         var items = issuedSdJwt.Split('~');
+        items = Array.FindAll(items, item => !string.IsNullOrEmpty(item));
 
         EncodedJwt = items.First();
         _jwtContent = Base64UrlEncoder.Decode(EncodedJwt.Split('.')[1]);
