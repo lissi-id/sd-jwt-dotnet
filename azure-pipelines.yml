@@ -40,4 +40,4 @@ steps:
 - task: NuGetCommand@2
   inputs:
     command: push
-    publishVstsFeed: 'lissi-oid4vc'
+    publishVstsFeed: 'OID4VC/lissi-oid4vc'
