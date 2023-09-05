@@ -25,15 +25,16 @@ steps:
     arguments: '--configuration $(buildConfiguration)'
   displayName: 'dotnet build $(buildConfiguration)'
 
-- task: NuGetCommand@2
+- task: DotNetCoreCLI@2
   inputs:
     command: pack
     packagesToPack: '**/SD-JWT.csproj'
-    packDestination: '$(Build.ArtifactStagingDirectory)'
     versioningScheme: byPrereleaseNumber
     majorVersion: '$(major)'
     minorVersion: '$(minor)'
     patchVersion: '$(patch)'
+    outputDir: '$(Build.ArtifactStagingDirectory)'
+  displayName: 'Pack Nuget Packages'
 
 - task: NuGetAuthenticate@1
 
