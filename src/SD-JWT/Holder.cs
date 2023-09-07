@@ -1,5 +1,6 @@
-using Jose;
-using Jose.keys;
+using System.Security.Cryptography;
+using System.Text;
+using Newtonsoft.Json;
 using SD_JWT.Abstractions;
 using SD_JWT.Models;
 
@@ -7,6 +8,40 @@ namespace SD_JWT;
 
 public class Holder : IHolder
 {
+    public string CreatePresentation(SdJwtDoc sdJwt, string[] holderDisclosures, string? holderKey = null,
+        string? nonce = null, string? audience = null)
+    {
+        /*
+            1. Decide which Disclosures to release to the Verifier, obtaining proper End-User consent if necessary.
+            2. If Holder Binding is required, create a Holder Binding JWT.
+            3. Create the Combined Format for Presentation, including the selected Disclosures and, if applicable, the Holder Binding JWT.
+            4. Send the Presentation to the Verifier.
+        */
+        var presentation = sdJwt.EncodedJwt;
+
+        foreach (var disclosure in sdJwt.Disclosures)
+            if (holderDisclosures.Contains(disclosure.GetDigest()))
+                presentation += $"~{disclosure.Serialize()}";
+
+        // Add holder binding
+        presentation += "~";
+
+        if (holderKey != null && nonce != null && audience != null)
+        {
+            var payload = new Dictionary<string, object>
+            {
+                { "nonce", nonce },
+                { "aud", audience },
+                { "iat", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString() }
+            };
+
+            var confirmationJwt = CreateJwt(payload, holderKey);
+            presentation += confirmationJwt;
+        }
+
+        return presentation;
+    }
+
     public SdJwtDoc ReceiveCredential(string sdJwt)
     {
         /*
@@ -19,57 +54,34 @@ public class Holder : IHolder
         return new SdJwtDoc(sdJwt);
     }
 
-    public string CreatePresentation(SdJwtDoc sdJwt, string[] holderDisclosures, string? holderKey = null,
-        string? nonce = null, string? audience = null)
+    private static string CreateJwt(Dictionary<string, object> payload, string holderKey)
     {
-        /*
-            1. Decide which Disclosures to release to the Verifier, obtaining proper End-User consent if necessary.
-            2. If Holder Binding is required, create a Holder Binding JWT.
-            3. Create the Combined Format for Presentation, including the selected Disclosures and, if applicable, the Holder Binding JWT.
-            4. Send the Presentation to the Verifier.
-        */
-        string presentation = sdJwt.EncodedJwt;
-
-        foreach (var disclosure in sdJwt.Disclosures)
+        var header = new
         {
-            if (holderDisclosures.Contains(disclosure.GetDigest()))
-                presentation += $"~{disclosure.Serialize()}";
-        }
+            alg = "ES256",
+            typ = "openid4vci-proof+jwt"
+        };
 
-        // Add holder binding
-        presentation += "~";
+        var headerBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(header));
+        var payloadBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(payload));
 
-        if (holderKey != null && nonce != null && audience != null)
+        var headerBase64 = Convert.ToBase64String(headerBytes);
+        var payloadBase64 = Convert.ToBase64String(payloadBytes);
+
+        var signatureInput = $"{headerBase64}.{payloadBase64}";
+        var signatureInputBytes = Encoding.UTF8.GetBytes(signatureInput);
+
+        byte[] signatureBytes;
+        using (var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256))
         {
-            var payload = new Dictionary<string, object>()
-            {
-                { "nonce", "XZOUco1u_gEPknxS78sWWg" },
-                { "aud", "https://example.com/verifier" },
-                { "iat", "1676965944" }
-            };
+            if (ecdsa == null)
+                throw new InvalidOperationException("ECDSA cannot be null");
 
-            byte[] x =
-            {
-                4, 114, 29, 223, 58, 3, 191, 170, 67, 128, 229, 33, 242, 178, 157, 150, 133, 25, 209, 139, 166, 69,
-                55, 26, 84, 48, 169, 165, 67, 232, 98, 9
-            };
-            byte[] y =
-            {
-                131, 116, 8, 14, 22, 150, 18, 75, 24, 181, 159, 78, 90, 51, 71, 159, 214, 186, 250, 47, 207, 246,
-                142, 127, 54, 183, 72, 72, 253, 21, 88, 53
-            };
-            byte[] d =
-            {
-                42, 148, 231, 48, 225, 196, 166, 201, 23, 190, 229, 199, 20, 39, 226, 70, 209, 148, 29, 70, 125, 14,
-                174, 66, 9, 198, 80, 251, 95, 107, 98, 206
-            };
-
-            var privateKey = EccKey.New(x, y, d);
-            var confirmationJwt = Jose.JWT.Encode(payload, privateKey, JwsAlgorithm.ES256);
-
-            presentation += confirmationJwt;
+            signatureBytes = ecdsa.SignData(signatureInputBytes, HashAlgorithmName.SHA256);
         }
+    
+        var signatureBase64 = Convert.ToBase64String(signatureBytes);
 
-        return presentation;
+        return $"{headerBase64}.{payloadBase64}.{signatureBase64}";
     }
 }
