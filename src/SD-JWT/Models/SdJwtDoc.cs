@@ -7,66 +7,30 @@ namespace SD_JWT.Models;
 public class SdJwtDoc
 {
     public ImmutableList<Disclosure> Disclosures { get; }
-    public string EncodedJwt { get; }
-
-    private readonly string _encodedSdJwt;
-
-    private readonly string _jwtContent;
-
-    private string? _verifiedJwtContent;
+    
+    public string IssuerSignedJwt { get; }
 
     public SdJwtDoc(string issuedSdJwt)
     {
-        _encodedSdJwt = issuedSdJwt;
-        
         var items = issuedSdJwt.Split('~');
         items = Array.FindAll(items, item => !string.IsNullOrEmpty(item));
 
-        EncodedJwt = items.First();
-        _jwtContent = Base64UrlEncoder.Decode(EncodedJwt.Split('.')[1]);
+        IssuerSignedJwt = items.First();
+        _jwtPayload = Base64UrlEncoder.Decode(IssuerSignedJwt.Split('.')[1]);
         Disclosures = items[1..].Select(Disclosure.Deserialize).ToImmutableList();
-        
+
         Verify();
     }
 
-    private void Verify()
-    {
-        JObject jObject = JObject.Parse(_jwtContent);
-        var hashedDisclosures = Disclosures.ToDictionary(x => x.GetDigest());
+    private readonly string _jwtPayload;
 
-        var sdProperties = FindPropertiesByName(jObject, "_sd");
-        
-        foreach (var sdProperty in sdProperties)
-        {
-            if (sdProperty.Value is JArray array)
-            {
-                foreach (var jtoken in array)
-                {
-                    string hash = jtoken.Value<string>()!;
-                    if (hashedDisclosures.Keys.Contains(hash))
-                    {
-                        var disclosure = hashedDisclosures[hash];
-                        var newJProperty = new JProperty("~~sd~~" + disclosure.Name, disclosure.Value);
-                        sdProperty.Parent!.Add(newJProperty);
-                        
-                        hashedDisclosures.Remove(hash);
-                    }
-                }
-            }
-        }
-
-        if (hashedDisclosures.Count != 0) throw new Exception("Invalid sd jwt");
-
-        _verifiedJwtContent = jObject.ToString();
-    }
-    
     private List<JProperty> FindPropertiesByName(JToken token, string propertyName)
     {
-        List<JProperty> matchingProperties = new List<JProperty>();
+        var matchingProperties = new List<JProperty>();
 
         if (token.Type == JTokenType.Object)
         {
-            foreach (JProperty property in token.Children<JProperty>())
+            foreach (var property in token.Children<JProperty>())
             {
                 if (property.Name == propertyName)
                 {
@@ -78,12 +42,44 @@ public class SdJwtDoc
         }
         else if (token.Type == JTokenType.Array)
         {
-            foreach (JToken child in token.Children())
+            foreach (var child in token.Children())
             {
                 matchingProperties.AddRange(FindPropertiesByName(child, propertyName));
             }
         }
 
         return matchingProperties;
+    }
+
+    private void Verify()
+    {
+        var jObject = JObject.Parse(_jwtPayload);
+        var hashedDisclosures = Disclosures.ToDictionary(x => x.GetDigest());
+
+        var sdProperties = FindPropertiesByName(jObject, "_sd");
+
+        foreach (var sdProperty in sdProperties)
+        {
+            if (sdProperty.Value is JArray array)
+            {
+                foreach (var jToken in array)
+                {
+                    var hash = jToken.Value<string>()!;
+                    if (hashedDisclosures.Keys.Contains(hash))
+                    {
+                        var disclosure = hashedDisclosures[hash];
+                        var newJProperty = new JProperty("~~sd~~" + disclosure.Name, disclosure.Value);
+                        sdProperty.Parent!.Add(newJProperty);
+
+                        hashedDisclosures.Remove(hash);
+                    }
+                }
+            }
+        }
+
+        if (hashedDisclosures.Count != 0)
+        {
+            throw new Exception("Invalid sd jwt");
+        }
     }
 }

@@ -1,10 +1,11 @@
 using SD_JWT.Models;
 
-namespace SD_JWT.Abstractions;
-
-public interface IHolder
+namespace SD_JWT.Abstractions
 {
-    public SdJwtDoc ReceiveCredential(string sdJwt);
+    public interface IHolder
+    {
+        public SdJwtDoc ReceiveCredential(string sdJwt);
 
-    public string CreatePresentation(SdJwtDoc sdJwt, string[] holderDisclosures, string? holderKey = null, string? nonce = null, string? audience = null);
+        public string CreatePresentation(string issuerSignedJwt, Disclosure[] disclosures, string? keyBindingJwt = null);
+    }
 }
