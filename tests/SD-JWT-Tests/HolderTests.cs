@@ -19,7 +19,7 @@ public class HolderTests
     {
         SdJwtDoc sdJwtDoc = new SdJwtDoc(sdJwtIssued);
         
-        var result = _holder.CreatePresentation(sdJwtDoc.IssuerSignedJwt, new[] { sdJwtDoc.Disclosures[2] });
+        var result = _holder.CreatePresentation(sdJwtDoc.EncodedIssuerSignedJwt, new[] { sdJwtDoc.Disclosures[2] });
 
         Assert.NotNull(result);
         Assert.That(result, Is.EqualTo(sdJwtPresentedWithoutConfirmation));

@@ -8,15 +8,15 @@ public class SdJwtDoc
 {
     public ImmutableList<Disclosure> Disclosures { get; }
     
-    public string IssuerSignedJwt { get; }
+    public string EncodedIssuerSignedJwt { get; }
 
     public SdJwtDoc(string issuedSdJwt)
     {
         var items = issuedSdJwt.Split('~');
         items = Array.FindAll(items, item => !string.IsNullOrEmpty(item));
 
-        IssuerSignedJwt = items.First();
-        _jwtPayload = Base64UrlEncoder.Decode(IssuerSignedJwt.Split('.')[1]);
+        EncodedIssuerSignedJwt = items.First();
+        _jwtPayload = Base64UrlEncoder.Decode(EncodedIssuerSignedJwt.Split('.')[1]);
         Disclosures = items[1..].Select(Disclosure.Deserialize).ToImmutableList();
 
         Verify();
