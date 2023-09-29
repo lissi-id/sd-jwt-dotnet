@@ -1,4 +1,3 @@
-using SD_JWT;
 using SD_JWT.Models;
 
 namespace SD_JWT_Tests;
@@ -6,8 +5,8 @@ namespace SD_JWT_Tests;
 public class DisclosureTests
 {
     private const string SerialisedDisclosure = "WyJfMjZiYzRMVC1hYzZxMktJNmNCVzVlcyIsImZhbWlseV9uYW1lIiwiTVx1MDBGNmJpdXMiXQ";
-    private readonly Disclosure DeserialisedDisclosure = new Disclosure
-        { Salt = "_26bc4LT-ac6q2KI6cBW5es", Name = "family_name", Value = "Möbius" };
+    private readonly Disclosure DeserialisedDisclosure = 
+        new("family_name", "Möbius") { Salt = "_26bc4LT-ac6q2KI6cBW5es" };
 
     [SetUp]
     public void Setup()

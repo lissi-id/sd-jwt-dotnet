@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
@@ -6,7 +5,6 @@ using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 
-[assembly: InternalsVisibleTo("SD-JWT-Tests")]
 namespace SD_JWT.Models;
 
 public class Disclosure
@@ -22,25 +20,24 @@ public class Disclosure
     public Disclosure(string name, object value)
     {
         var bytes = new byte[16];
-        RandomNumberGenerator.Create().GetBytes(new byte[16]);
+        RandomNumberGenerator.Create().GetBytes(bytes);
         Salt = Base64UrlEncoder.Encode(bytes);
         Name = name;
         Value = value;
     }
     
-    internal Disclosure()
-    {
-    }
-
     public static Disclosure Deserialize(string input)
     {
         var decodedInput = Base64UrlEncoder.Decode(input);
+        
         var array = JArray.Parse(decodedInput) ?? throw new SerializationException($"Could not deserialize given disclosure {input}");
-        return new Disclosure()
+        
+        var name = array[1].Value<string>() ?? throw new SerializationException("Name could not be deserialized");
+        var value = array[2];
+        
+        return new Disclosure(name, value)
         {
             Salt = array[0].Value<string>() ?? throw new SerializationException("Salt could not be deserialized"),
-            Name = array[1].Value<string>() ?? throw new SerializationException("Name could not be deserialized"),
-            Value = array[2],
             _base64UrlEncoded = input
         };
     }
