@@ -11,13 +11,13 @@ public class Disclosure
 {
     public string Salt;
     
-    public string Name;
+    public string? Name;
     
     public object Value;
 
     private string? _base64UrlEncoded;
 
-    public Disclosure(string name, object value)
+    public Disclosure(string? name, object value)
     {
         var bytes = new byte[16];
         RandomNumberGenerator.Create().GetBytes(bytes);
@@ -31,10 +31,14 @@ public class Disclosure
         var decodedInput = Base64UrlEncoder.Decode(input);
         
         var array = JArray.Parse(decodedInput) ?? throw new SerializationException($"Could not deserialize given disclosure {input}");
-        
-        var name = array[1].Value<string>() ?? throw new SerializationException("Name could not be deserialized");
-        var value = array[2];
-        
+
+        var name = array.Count == 3 
+            ? array[1].Value<string>() ?? throw new SerializationException("Name could not be deserialized") 
+            : null;
+        var value = array.Count == 3
+            ? array[2]
+            : array[1];
+
         return new Disclosure(name, value)
         {
             Salt = array[0].Value<string>() ?? throw new SerializationException("Salt could not be deserialized"),
