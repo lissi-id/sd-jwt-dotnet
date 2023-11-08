@@ -21,9 +21,8 @@ namespace SD_JWT
         public SdJwtDoc ReceiveCredential(string issuedSdJwt, string issuerJwk)
         {
             ValidateSdJwt(issuedSdJwt, issuerJwk);
-            var sd = new SdJwtDoc(issuedSdJwt);
-            Console.WriteLine(JsonExtensions.SerializeToJson(sd));
-            return sd;
+            
+            return new SdJwtDoc(issuedSdJwt);
         }
 
         private void ValidateSdJwt(string issuedSdJwt, string issuerJwk)
