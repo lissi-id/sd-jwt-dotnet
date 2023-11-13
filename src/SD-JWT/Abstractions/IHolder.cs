@@ -4,7 +4,7 @@ namespace SD_JWT.Abstractions
 {
     public interface IHolder
     {
-        public SdJwtDoc ReceiveCredential(string issuedSdJwt, string issuerJwk);
+        public SdJwtDoc ReceiveCredential(string issuedSdJwt, string issuerJwk, string validJwtIssuer);
 
         public string CreatePresentation(string issuerSignedJwt, Disclosure[] disclosures, string? keyBindingJwt = null);
     }

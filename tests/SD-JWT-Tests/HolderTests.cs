@@ -38,6 +38,7 @@ public class HolderTests
 
     private const string issuerJwk = "{\"kty\":\"EC\",\"use\":\"sig\",\"crv\":\"P-256\",\"kid\":\"zzeUnL35VO9Vdz_iRNGRiw89i8CNuwl6WYgXzigFvXI\",\"x\":\"xpCIuCmbmTKowucA4dddE7lZyG1ZvpAuS3ppfLwVcOE\",\"y\":\"KQVHXWH-0XEpCoH-bp9QsoWbvdWj0Q6OfADriYyjJuE\",\"alg\":\"ES256\"}";
     
+    private const string validIssuer = "https://issuer.example.com";
     private readonly IHolder _holder = new Holder();
 
     [Test]
@@ -58,7 +59,7 @@ public class HolderTests
     [TestCase(validComplexStructuredJwt)]
     public void SuccessfullyReceiveCredential(string sdJwt)
     {
-        Assert.DoesNotThrow(() => Assert.NotNull(_holder.ReceiveCredential(sdJwt, issuerJwk)));
+        Assert.DoesNotThrow(() => Assert.NotNull(_holder.ReceiveCredential(sdJwt, issuerJwk, validIssuer)));
     }
     
     [Test]
@@ -68,7 +69,7 @@ public class HolderTests
     [TestCase(invalidFlatJwtWithRepeatingDigests)]
     public void FailReceiveCredential(string sdJwt)
     {
-        var ex = Assert.Throws<InvalidOperationException>(() => _holder.ReceiveCredential(sdJwt, issuerJwk));
+        var ex = Assert.Throws<InvalidOperationException>(() => _holder.ReceiveCredential(sdJwt, issuerJwk, validIssuer));
         Assert.That(ex.Message, Does.Contain("Invalid SD-JWT - "));
     }
 }

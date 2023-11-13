@@ -18,21 +18,21 @@ namespace SD_JWT
             return presentation;
         }
 
-        public SdJwtDoc ReceiveCredential(string issuedSdJwt, string issuerJwk)
+        public SdJwtDoc ReceiveCredential(string issuedSdJwt, string issuerJwk, string validJwtIssuer)
         {
-            ValidateSdJwt(issuedSdJwt, issuerJwk);
+            ValidateSdJwt(issuedSdJwt, issuerJwk, validJwtIssuer);
             
             return new SdJwtDoc(issuedSdJwt);
         }
 
-        private void ValidateSdJwt(string issuedSdJwt, string issuerJwk)
+        private void ValidateSdJwt(string issuedSdJwt, string issuerJwk, string validJwtIssuer)
         {
             var sdJwtItems = issuedSdJwt.Split('~');
             if (!string.IsNullOrEmpty(sdJwtItems.Last()))
                 throw new InvalidOperationException("Invalid SD-JWT - Cant contain Key Binding JWT");
 
             var issuerSignedJwt = sdJwtItems.First();
-            IsIssuerSignedJwtValid(issuerSignedJwt, issuerJwk);
+            IsIssuerSignedJwtValid(issuerSignedJwt, issuerJwk, validJwtIssuer);
 
             //TODO: Use _sd_alg to hash and verify the digests
             var issuerSignedJwtPayload = JObject.Parse(Base64UrlEncoder.Decode(issuerSignedJwt.Split('.')[1]));
@@ -105,7 +105,7 @@ namespace SD_JWT
             return issuerSignedJwtPayload;
         }
 
-        private void IsIssuerSignedJwtValid(string issuerSignedJwt, string jwkJson)
+        private void IsIssuerSignedJwtValid(string issuerSignedJwt, string jwkJson, string validJwtIssuer)
         {
             var jwtHandler = new JwtSecurityTokenHandler();
             
@@ -114,7 +114,8 @@ namespace SD_JWT
             
             var validationParameters = new TokenValidationParameters
             {
-                ValidateIssuer = false,
+                ValidateIssuer = true,
+                ValidIssuer = validJwtIssuer,
                 ValidateAudience = false,
                 ValidateLifetime =  exp != null,
                 ValidateIssuerSigningKey = true,
