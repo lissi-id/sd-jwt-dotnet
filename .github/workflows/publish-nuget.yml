@@ -27,7 +27,6 @@ jobs:
       - name: Get Build Version
         run: |
           Write-Host $Env:GITHUB_REF
-          echo "APP_VERSION=$APP_VERSION" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
         shell: pwsh
 
       - name: Display Variable
