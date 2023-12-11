@@ -17,7 +17,7 @@ jobs:
       PATCH: 0
       APP_VERSION: v$(MAJOR).$(MINOR).$(PATCH)
       BUILD_CONFIG: 'Release'
-      SOLUTION: 'SD-JWt.sln'
+      SOLUTION: 'SD-JWT.sln'
 
     runs-on: ubuntu-latest
 
