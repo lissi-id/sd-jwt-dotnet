@@ -9,10 +9,7 @@ on:
       - setup-cicd-pipeline-nuget
 
 env:
-  MAJOR: 0
-  MINOR: 1
-  PATCH: 0
-  APP_VERSION: $MAJOR.$MINOR.$PATCH
+  APP_VERSION: 0.1.0
   BUILD_CONFIG: 'Release'
   SOLUTION: 'SD-JWT.sln'
       
