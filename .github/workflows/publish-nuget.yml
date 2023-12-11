@@ -15,7 +15,7 @@ jobs:
       MAJOR: 0
       MINOR: 1
       PATCH: 0
-      APP_VERSION: v$(MAJOR).$(MINOR).$(PATCH)
+      APP_VERSION: $(MAJOR).$(MINOR).$(PATCH)
       BUILD_CONFIG: 'Release'
       SOLUTION: 'SD-JWT.sln'
 
@@ -42,7 +42,7 @@ jobs:
           dotnet-version: 3.1.*
 
       - name: Build
-        run: dotnet build $SOLUTION --configuration $BUILD_CONFIG -p:Version=$APP_VERSION --no-restore
+        run: dotnet build $SOLUTION --configuration $BUILD_CONFIG -p:Version=0.1.0 --no-restore
 
       - name: Run tests
         run: dotnet test /p:Configuration=$env:BUILD_CONFIG --no-restore --no-build --verbosity normal
