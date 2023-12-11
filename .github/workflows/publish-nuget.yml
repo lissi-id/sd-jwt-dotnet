@@ -32,7 +32,7 @@ jobs:
 
       - name: Display Variable
         run: |
-          echo "Variable Value: $MY_VARIABLE"
+          echo "Variable Value: $APP_VERSION"
 
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1.0.5
