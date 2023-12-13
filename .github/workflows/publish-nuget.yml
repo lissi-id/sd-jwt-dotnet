@@ -20,7 +20,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
+        
+      - name: Version
+        run: echo $APP_VERSION
+      
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1.0.5
 
