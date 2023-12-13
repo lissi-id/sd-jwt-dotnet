@@ -11,7 +11,11 @@ on:
 env:
   BUILD_CONFIG: 'Release'
   SOLUTION: 'SD-JWT.sln'
-    
+  IS_PULL_REQUEST: ${{ github.event_name == 'pull_request' }}
+  IS_MAIN_BRANCH: ${{ github.ref == 'refs/heads/main' }}
+  MAJOR: '0'
+  MINOR: '1'
+  PATCH: '0'
     
 jobs:
   build:
@@ -20,19 +24,28 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        
-      - name: Ref
-        run: echo ${{ github.ref }}
-        
-      - name: Set Main Version
-        run: |
-          echo "APP_VERSION=0.1.0-rc.${{ github.run_number }}" >> $GITHUB_ENV
-        if: ${{ github.ref == 'refs/heads/setup-cicd-pipeline-nuget' }}
+#        
+#      - name: Set Channel
+#        if: $IS_MAIN_BRANCH
+#        run: |
+#          echo "SUFFIX=rc" >> $GITHUB_ENV
+#          
+#      - name: Set Channel
+#        if: $IS_PULL_REQUEST
+#        run: |
+#          if [[ ${{ github.event.pull_request.head.ref }} =~ ^release/.*$ ]]; then
+#            echo "SUFFIX=rc" >> $GITHUB_ENV
+#          fi
+#          echo "SUFFIX=alpha" >> $GITHUB_ENV
       
-#      - name: Set Pull Request Version
-#        if: ${{ github.event_name == 'pull_request' }}
-#        env:
-#          APP_VERSION: 0.1.0-alpha.${{ github.run_number }}
+      - name: Set Version
+        run: |
+          if $IS_MAIN_BRANCH; then
+            echo $SUFFIX=rc
+          else if $IS_PULL_REQUEST; then
+            echo $SUFFIX=alpha
+          fi
+          echo "APP_VERSION=$MAJOR.$MINOR.$PATCH-$SUFFIX.${{ github.run_number }}" >> $GITHUB_ENV
         
       - name: Version
         run: echo $APP_VERSION
