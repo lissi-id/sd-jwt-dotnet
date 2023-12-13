@@ -22,14 +22,14 @@ jobs:
       - uses: actions/checkout@v2
         
       - name: Set Main Version
+        run: |
+          echo "APP_VERSION=0.1.0-rc.${{ github.run_number }}" >> $GITHUB_ENV
         if: ${{ github.ref == 'setup-cicd-pipeline-nuget' }}
-        env:
-          APP_VERSION:  0.1.0-rc.${{ github.run_number }}
       
-      - name: Set Pull Request Version
-        if: ${{ github.event_name == 'pull_request' }}
-        env:
-          APP_VERSION: 0.1.0-alpha.${{ github.run_number }}
+#      - name: Set Pull Request Version
+#        if: ${{ github.event_name == 'pull_request' }}
+#        env:
+#          APP_VERSION: 0.1.0-alpha.${{ github.run_number }}
         
       - name: Version
         run: echo $APP_VERSION
