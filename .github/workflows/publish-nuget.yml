@@ -9,7 +9,7 @@ on:
       - setup-cicd-pipeline-nuget
 
 env:
-  APP_VERSION: 0.1.0
+  APP_VERSION: 0.1.0-alpha.${{ github.run_id }}
   BUILD_CONFIG: 'Release'
   SOLUTION: 'SD-JWT.sln'
       
@@ -20,11 +20,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Get Build Version
-        run: |
-          Write-Host $Env:GITHUB_REF
-        shell: pwsh
 
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1.0.5
