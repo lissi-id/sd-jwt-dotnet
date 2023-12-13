@@ -27,7 +27,7 @@ jobs:
       - name: Set Main Version
         run: |
           echo "APP_VERSION=0.1.0-rc.${{ github.run_number }}" >> $GITHUB_ENV
-        if: ${{ github.ref == 'setup-cicd-pipeline-nuget' }}
+        if: ${{ github.ref == 'refs/heads/setup-cicd-pipeline-nuget' }}
       
 #      - name: Set Pull Request Version
 #        if: ${{ github.event_name == 'pull_request' }}
