@@ -21,6 +21,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         
+      - name: Ref
+        run: echo ${{ github.ref }}
+        
       - name: Set Main Version
         run: |
           echo "APP_VERSION=0.1.0-rc.${{ github.run_number }}" >> $GITHUB_ENV
