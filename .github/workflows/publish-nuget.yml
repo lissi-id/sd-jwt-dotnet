@@ -9,10 +9,10 @@ on:
       - setup-cicd-pipeline-nuget
 
 env:
-  APP_VERSION: 0.1.0-alpha.${{ github.run_number }}
   BUILD_CONFIG: 'Release'
   SOLUTION: 'SD-JWT.sln'
-      
+    
+    
 jobs:
   build:
 
@@ -20,6 +20,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        
+      - name: Set Main Version
+        if: ${{ github.ref == 'setup-cicd-pipeline-nuget' }}
+        env:
+          APP_VERSION:  0.1.0-rc.${{ github.run_number }}
+      
+      - name: Set Pull Request Version
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          APP_VERSION: 0.1.0-alpha.${{ github.run_number }}
         
       - name: Version
         run: echo $APP_VERSION
