@@ -41,9 +41,9 @@ jobs:
       - name: Set Version
         run: |
           if $IS_MAIN_BRANCH; then
-            echo $SUFFIX=rc
+            echo "SUFFIX=rc"  >> $GITHUB_ENV
           elif $IS_PULL_REQUEST; then
-            echo $SUFFIX=alpha
+            echo "SUFFIX=alpha"  >> $GITHUB_ENV
           fi
           echo "APP_VERSION=$MAJOR.$MINOR.$PATCH-$SUFFIX.${{ github.run_number }}" >> $GITHUB_ENV
         
