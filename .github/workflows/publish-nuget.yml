@@ -57,6 +57,5 @@ jobs:
       - name: Pack
         run: dotnet pack /p:Configuration=$BUILD_CONFIG /p:Version=$APP_VERSION --no-build --output .
         
-#      - name: Publish
-#        if: startsWith(github.ref, 'refs/heads/release')
-#        run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}
+      - name: Publish
+        run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.LISSI_NUGET_FEED_API_KEY}}
