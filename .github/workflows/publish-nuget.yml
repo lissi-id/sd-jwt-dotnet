@@ -12,7 +12,7 @@ env:
   BUILD_CONFIG: 'Release'
   SOLUTION: 'SD-JWT.sln'
   IS_PULL_REQUEST: ${{ github.event_name == 'pull_request' }}
-  IS_MAIN_BRANCH: ${{ github.ref == 'refs/heads/main' }}
+  IS_MAIN_BRANCH: ${{ github.ref == 'refs/heads/setup-cicd-pipeline-nuget' }}
   MAJOR: '0'
   MINOR: '1'
   PATCH: '0'
