@@ -28,11 +28,11 @@ jobs:
       - name: Set Version
         run: |
           if $IS_MAIN_BRANCH; then
-            SUFFIX="rc"
+            SUFFIX="-rc.{{ github.run_number }}"
           elif $IS_PULL_REQUEST; then
-            SUFFIX="alpha"
+            SUFFIX="-pr.${{ github.event.number }}.${{ github.run_number }}
           fi
-          echo "APP_VERSION=$MAJOR.$MINOR.$PATCH-$SUFFIX.${{ github.run_number }}" >> $GITHUB_ENV
+          echo "APP_VERSION=$MAJOR.$MINOR.$PATCH$SUFFIX" >> $GITHUB_ENV
         
       - name: Version
         run: echo $APP_VERSION
@@ -52,10 +52,10 @@ jobs:
         run: dotnet build $SOLUTION --configuration $BUILD_CONFIG -p:Version=$APP_VERSION --no-restore
 
       - name: Run tests
-        run: dotnet test /p:Configuration=$BUILD_CONFIG --no-restore --no-build --verbosity normal
+        run: dotnet test $SOLUTION --configuration $BUILD_CONFIG --no-restore --no-build --verbosity normal
 
       - name: Pack
-        run: dotnet pack /p:Configuration=$BUILD_CONFIG /p:Version=$APP_VERSION --no-build --output .
+        run: dotnet pack $SOLUTION --configuration $BUILD_CONFIG -p:Version=$APP_VERSION --no-build --output .
         
       - name: Publish
         run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.LISSI_NUGET_FEED_API_KEY}}
