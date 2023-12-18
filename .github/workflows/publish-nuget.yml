@@ -28,7 +28,7 @@ jobs:
       - name: Set Version
         run: |
           if $IS_MAIN_BRANCH; then
-            SUFFIX="-rc.{{ github.run_number }}"
+            SUFFIX="-rc.${{ github.run_number }}"
           elif $IS_PULL_REQUEST; then
             SUFFIX="-pr.${{ github.event.pull_request.number }}.${{ github.run_number }}"
           fi
