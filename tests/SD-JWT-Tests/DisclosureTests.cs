@@ -24,7 +24,7 @@ public class DisclosureTests
     {
         Assert.AreEqual(DeserialisedDisclosure.Salt,  Disclosure.Deserialize(SerialisedDisclosure).Salt);
         Assert.AreEqual(DeserialisedDisclosure.Name,  Disclosure.Deserialize(SerialisedDisclosure).Name);
-        Assert.AreEqual(DeserialisedDisclosure.Value,  Disclosure.Deserialize(SerialisedDisclosure).Value);
+        Assert.AreEqual(DeserialisedDisclosure.Value,  Disclosure.Deserialize(SerialisedDisclosure).Value.ToString());
     }
 
     [Test]

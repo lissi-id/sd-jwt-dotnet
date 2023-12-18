@@ -18,9 +18,10 @@ namespace SD_JWT
             return presentation;
         }
 
-        public SdJwtDoc ReceiveCredential(string issuedSdJwt, string issuerJwk, string validJwtIssuer)
+        public SdJwtDoc ReceiveCredential(string issuedSdJwt, string? issuerJwk = null, string? validJwtIssuer = null)
         {
-            ValidateSdJwt(issuedSdJwt, issuerJwk, validJwtIssuer);
+            if (!string.IsNullOrWhiteSpace(issuerJwk) && !string.IsNullOrWhiteSpace(validJwtIssuer))
+                ValidateSdJwt(issuedSdJwt, issuerJwk, validJwtIssuer);
             
             return new SdJwtDoc(issuedSdJwt);
         }

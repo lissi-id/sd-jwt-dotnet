@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  BUILD_CONFIG: 'Release'
+  SOLUTION: 'SD-JWT.sln'
+  IS_PULL_REQUEST: ${{ github.event_name == 'pull_request' }}
+  IS_MAIN_BRANCH: ${{ github.ref == 'refs/heads/main' }}
+  MAJOR: '0'
+  MINOR: '1'
+  PATCH: '0'
+    
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set Version
+        run: |
+          if $IS_MAIN_BRANCH; then
+            SUFFIX="-rc.{{ github.run_number }}"
+          elif $IS_PULL_REQUEST; then
+            SUFFIX="-pr.${{ github.event.pull_request.number }}.${{ github.run_number }}"
+          fi
+          echo "APP_VERSION=$MAJOR.$MINOR.$PATCH$SUFFIX" >> $GITHUB_ENV
+      
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1.0.5
+
+      - name: Restore dependencies
+        run: nuget restore $SOLUTION
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 3.1.*
+
+      - name: Build
+        run: dotnet build $SOLUTION --configuration $BUILD_CONFIG -p:Version=$APP_VERSION --no-restore
+
+      - name: Run tests
+        run: dotnet test $SOLUTION --configuration $BUILD_CONFIG --no-restore --no-build --verbosity normal
+
+      - name: Pack
+        run: dotnet pack $SOLUTION --configuration $BUILD_CONFIG -p:Version=$APP_VERSION --no-build --output .
+        
+      - name: Publish
+        run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.LISSI_NUGET_FEED_API_KEY}}
