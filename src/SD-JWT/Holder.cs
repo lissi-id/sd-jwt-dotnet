@@ -10,10 +10,10 @@ namespace SD_JWT
     {
         public string CreatePresentation(string issuerSignedJwt, Disclosure[] disclosures, string? keyBindingJwt = null)
         {
-            var presentation = disclosures.Aggregate(issuerSignedJwt, (current, disclosure) => current + $"~{disclosure.Serialize()}");
+            var presentation = disclosures.Aggregate(issuerSignedJwt + "~", (current, disclosure) => current + $"{disclosure.Serialize()}~");
 
             if (!string.IsNullOrEmpty(keyBindingJwt))
-                presentation += $"~{keyBindingJwt}";
+                presentation += keyBindingJwt;
 
             return presentation;
         }
