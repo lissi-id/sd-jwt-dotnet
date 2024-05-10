@@ -6,6 +6,6 @@ namespace SD_JWT.Abstractions
     {
         public SdJwtDoc ReceiveCredential(string issuedSdJwt, string? issuerJwk = null, string? validJwtIssuer = null);
 
-        public string CreatePresentation(string issuerSignedJwt, Disclosure[] disclosures, string? keyBindingJwt = null);
+        public PresentationFormat CreatePresentationFormat(string issuerSignedJwt, Disclosure[] disclosures);
     }
 }

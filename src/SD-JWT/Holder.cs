@@ -8,14 +8,10 @@ namespace SD_JWT
 {
     public class Holder : IHolder
     {
-        public string CreatePresentation(string issuerSignedJwt, Disclosure[] disclosures, string? keyBindingJwt = null)
+        public PresentationFormat CreatePresentationFormat(string issuerSignedJwt, Disclosure[] disclosures)
         {
             var presentation = disclosures.Aggregate(issuerSignedJwt + "~", (current, disclosure) => current + $"{disclosure.Serialize()}~");
-
-            if (!string.IsNullOrEmpty(keyBindingJwt))
-                presentation += keyBindingJwt;
-
-            return presentation;
+            return new PresentationFormat(presentation);
         }
 
         public SdJwtDoc ReceiveCredential(string issuedSdJwt, string? issuerJwk = null, string? validJwtIssuer = null)
