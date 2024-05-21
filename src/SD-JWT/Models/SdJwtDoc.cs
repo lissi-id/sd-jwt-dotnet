@@ -29,10 +29,13 @@ public class SdJwtDoc
     /// The unsecured payload of the SD-JWT as a JObject
     /// </summary>
     public JObject UnsecuredPayload { get; }
-    
 
     public SdJwtDoc(string serializedSdJwt)
     {
+        if (!serializedSdJwt.EndsWith('~'))
+        {
+            serializedSdJwt = serializedSdJwt.Substring(0, serializedSdJwt.LastIndexOf('~'));
+        }
         var sdJwtItems = serializedSdJwt.Split('~');
         sdJwtItems = Array.FindAll(sdJwtItems, item => !string.IsNullOrEmpty(item));
 
@@ -43,16 +46,34 @@ public class SdJwtDoc
         UnsecuredPayload = DecodeSecuredPayload((JObject)SecuredPayload.DeepClone(), Disclosures.ToList());
     }
     
+    public void AssertThatJwtSignatureIsValid(string issuerJwk, string expectedIssuer)
+    {
+        var jwtHandler = new JwtSecurityTokenHandler();
+        
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = expectedIssuer,
+            ValidateAudience = false,
+            ValidateLifetime =  UnsecuredPayload.SelectToken("exp") != null,
+            ValidateIssuerSigningKey = true,
+            ValidTypes = new string[] {"vc+sd-jwt"},
+            ValidAlgorithms = new string[] {"ES256"},
+            IssuerSigningKey = JsonWebKey.Create(issuerJwk)
+        };
+
+        try
+        {
+            jwtHandler.ValidateToken(IssuerSignedJwt, validationParameters, out _);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Invalid SD-JWT - Issuer Signed Jwt invalid", ex);
+        }
+    }
     
     private JObject DecodeSecuredPayload(JObject securedPayload, List<Disclosure> disclosures)
     {
-        // Todo: Accept Key Binding JWT
-        // var sdJwtItems = securedPayloadEncoded.Split('~');
-        // if (!string.IsNullOrEmpty(sdJwtItems.Last()))
-        //     throw new InvalidOperationException("Invalid SD-JWT - Cant contain Key Binding JWT");
-        
-        // Todo: Move to Holder implementation
-        // AssertThatJwtSignatureIsValid(issuerSignedJwt, issuerJwk, validJwtIssuer);
         AssertThatRequiredClaimsArePresent(securedPayload);
         
         string sdAlg = securedPayload.SelectToken("$._sd_alg")?.Value<string>() 
@@ -128,32 +149,6 @@ public class SdJwtDoc
         }
         
         return securedPayload;
-    }
-
-    public void AssertThatJwtSignatureIsValid(string issuerJwk, string expectedIssuer)
-    {
-        var jwtHandler = new JwtSecurityTokenHandler();
-        
-        var validationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = expectedIssuer,
-            ValidateAudience = false,
-            ValidateLifetime =  UnsecuredPayload.SelectToken("exp") != null,
-            ValidateIssuerSigningKey = true,
-            ValidTypes = new string[] {"vc+sd-jwt"},
-            ValidAlgorithms = new string[] {"ES256"},
-            IssuerSigningKey = JsonWebKey.Create(issuerJwk)
-        };
-
-        try
-        {
-            jwtHandler.ValidateToken(IssuerSignedJwt, validationParameters, out _);
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException("Invalid SD-JWT - Issuer Signed Jwt invalid", ex);
-        }
     }
 }
 
