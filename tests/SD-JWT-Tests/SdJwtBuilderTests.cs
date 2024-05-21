@@ -55,7 +55,7 @@ public class SdJwtBuilderTests
         var jwt = sdJwtBuilder.Build();
         
         Assert.That(!string.IsNullOrEmpty(jwt));
-        Assert.AreEqual(3, jwt.Split('~').Length);
+        Assert.That(3, Is.EqualTo(jwt.Split('~').Length));
     }
     
     //[Test] TODO: Fix this test
@@ -84,6 +84,6 @@ public class SdJwtBuilderTests
         var sdJwt = sdJwtBuilder.Build();
         
         Assert.That(!string.IsNullOrEmpty(sdJwt));
-        Assert.AreEqual(3, sdJwt.Split('~').Length);
+        Assert.That(3, Is.EqualTo(sdJwt.Split('~').Length));
     }
 }

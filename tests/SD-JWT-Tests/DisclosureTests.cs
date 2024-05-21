@@ -16,15 +16,15 @@ public class DisclosureTests
     [Test]
     public void CanSerializeDisclosure()
     {
-        Assert.AreEqual(SerialisedDisclosure, DeserialisedDisclosure.Serialize());
+        Assert.That(SerialisedDisclosure, Is.EqualTo(DeserialisedDisclosure.Serialize()));
     }
 
     [Test]
     public void CanDeserializeDisclosure()
     {
-        Assert.AreEqual(DeserialisedDisclosure.Salt,  Disclosure.Deserialize(SerialisedDisclosure).Salt);
-        Assert.AreEqual(DeserialisedDisclosure.Name,  Disclosure.Deserialize(SerialisedDisclosure).Name);
-        Assert.AreEqual(DeserialisedDisclosure.Value,  Disclosure.Deserialize(SerialisedDisclosure).Value.ToString());
+        Assert.That(DeserialisedDisclosure.Salt,  Is.EqualTo(Disclosure.Deserialize(SerialisedDisclosure).Salt));
+        Assert.That(DeserialisedDisclosure.Name,  Is.EqualTo(Disclosure.Deserialize(SerialisedDisclosure).Name));
+        Assert.That(DeserialisedDisclosure.Value,  Is.EqualTo(Disclosure.Deserialize(SerialisedDisclosure).Value.ToString()));
     }
 
     [Test]
@@ -34,6 +34,6 @@ public class DisclosureTests
 
         string actualHash = DeserialisedDisclosure.GetDigest();
         
-        Assert.AreEqual(expectedHash, actualHash);
+        Assert.That(expectedHash, Is.EqualTo(actualHash));
     }
 }

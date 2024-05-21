@@ -1,13 +1,12 @@
-# SD-JWT for .NET (Experimental)
+# SD-JWT for DotNet
 
-This is an experimental implementation of the sd-jwt specification. The purpose of this was to understand the serialisation and deserialisation of the combined issuance and presentation formats.
+This is an implementation of version 8 of the SD-JWT draft at [IETF](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-selective-disclosure-jwt-08).
 
-# Requirements
+## Current state
 
-The intention was to use the minimum amount of dependencies, but I also tried out differnt jwt libraries for decoding and encoding therefore the project currently has more dependencies than necesarry
+The library is currently focused on the holder capabilities of the draft. The issuer and verifier capabilities are not yet implemented.
 
-## Askar
+## Usage
 
-To test the signing of sd-jwt with aries-askar you have to build the askar library for your platform and import the askar wrapper from [Github](https://github.com/esatus/aries-askar).
+See tests for examples of how to use the library.
 
-Update the path to the `aries-askar-dotnet.csproj` file in `src/SD-JWT-Askar/SD-JWT-Askar.csproj` and `SD-JWT.sln`

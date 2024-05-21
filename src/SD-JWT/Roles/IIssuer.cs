@@ -1,6 +1,6 @@
 using SD_JWT.Models;
 
-namespace SD_JWT.Abstractions;
+namespace SD_JWT.Roles;
 
 public interface IIssuer
 {
