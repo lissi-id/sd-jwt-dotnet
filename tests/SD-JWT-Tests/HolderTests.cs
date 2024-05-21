@@ -1,6 +1,7 @@
-using SD_JWT;
-using SD_JWT.Abstractions;
+using Newtonsoft.Json;
 using SD_JWT.Models;
+using SD_JWT.Roles;
+using SD_JWT.Roles.Implementation;
 
 namespace SD_JWT_Tests;
 
@@ -49,9 +50,8 @@ public class HolderTests
     {
         SdJwtDoc sdJwtDoc = new SdJwtDoc(sdJwtIssued);
         
-        var result = _holder.CreatePresentationFormat(sdJwtDoc.EncodedIssuerSignedJwt, new[] { sdJwtDoc.Disclosures[2] });
-
-        Assert.NotNull(result);
+        var result = _holder.CreatePresentationFormat(sdJwtDoc.IssuerSignedJwt, new[] { sdJwtDoc.Disclosures[2] });
+        
         Assert.That(result.Value, Is.EqualTo(sdJwtPresentedWithoutConfirmation));
     }
     
@@ -62,7 +62,12 @@ public class HolderTests
     [TestCase(validComplexStructuredJwt)]
     public void SuccessfullyReceiveCredential(string sdJwt)
     {
-        Assert.DoesNotThrow(() => Assert.NotNull(_holder.ReceiveCredential(sdJwt, issuerJwk, validIssuer)));
+        IHolder sut = new Holder();
+        var result = sut.ReceiveCredential(sdJwt, issuerJwk, validIssuer);
+        
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Disclosures, Is.Not.Empty);
+        Assert.That(result.IssuerSignedJwt, Is.EqualTo(sdJwt.Substring(0, sdJwt.IndexOf('~'))));
     }
     
     [Test]

@@ -25,25 +25,31 @@ public class Disclosure
         Name = name;
         Value = value;
     }
-    
-    public static Disclosure Deserialize(string input)
+
+    private Disclosure(string base64UrlEncoded)
     {
-        var decodedInput = Base64UrlEncoder.Decode(input);
+        var decodedInput = Base64UrlEncoder.Decode(base64UrlEncoded);
         
-        var array = JArray.Parse(decodedInput) ?? throw new SerializationException($"Could not deserialize given disclosure {input}");
+        var array = JArray.Parse(decodedInput) ?? throw new SerializationException($"Could not deserialize given disclosure {base64UrlEncoded}");
 
         var name = array.Count == 3 
             ? array[1].Value<string>() ?? throw new SerializationException("Name could not be deserialized") 
             : null;
+        
         var value = array.Count == 3
             ? array[2]
             : array[1];
 
-        return new Disclosure(name, value)
-        {
-            Salt = array[0].Value<string>() ?? throw new SerializationException("Salt could not be deserialized"),
-            _base64UrlEncoded = input
-        };
+        Name = name != "_sd" ? name : throw new SerializationException("Name of disclosure must not be _sd");
+        Value = value;
+        Salt = array[0].Value<string>() ?? throw new SerializationException("Salt could not be deserialized");
+        _base64UrlEncoded = base64UrlEncoded;
+    }
+    
+    
+    public static Disclosure Deserialize(string input)
+    {
+        return new Disclosure(input);
     }
     
     public string Serialize()
@@ -59,15 +65,23 @@ public class Disclosure
     /// Get the hash of the disclosure
     /// </summary>
     /// <returns>The base64url encoded hash of the base64url encoded disclosure json object</returns>
-    public string GetDigest()
+    public string GetDigest(SdAlg hashAlgorithm = SdAlg.SHA256)
     {
         var hashValue = _base64UrlEncoded != null ? ComputeDigest(_base64UrlEncoded) : ComputeDigest(Serialize());
         return Base64UrlEncoder.Encode(hashValue);
     }
     
-    private byte[] ComputeDigest(string input)
+    private byte[] ComputeDigest(string input, SdAlg hashAlgorithm = SdAlg.SHA256)
     {
-        using var sha26 = SHA256.Create();
-        return sha26.ComputeHash(Encoding.ASCII.GetBytes(input));
+        switch (hashAlgorithm)
+        {
+            case SdAlg.SHA256:
+            {
+                using var sha26 = SHA256.Create();
+                return sha26.ComputeHash(Encoding.ASCII.GetBytes(input));
+            }
+            default:
+                throw new InvalidOperationException("Unsupported hash algorithm");
+        }
     }
 }

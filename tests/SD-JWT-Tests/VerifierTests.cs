@@ -1,5 +1,4 @@
-using SD_JWT;
-using SD_JWT.Abstractions;
+using SD_JWT.Roles.Implementation;
 
 namespace SD_JWT_Tests;
 
@@ -57,6 +56,6 @@ public class VerifierTests
     //[Test] TODO: Fix this test
     public void CanVerifyPresentation()
     {
-        Assert.True(_verifier.VerifyPresentation(_expectedPresentation, _issuerJwk));
+        Assert.That(_verifier.VerifyPresentation(_expectedPresentation, _issuerJwk));
     }
 }

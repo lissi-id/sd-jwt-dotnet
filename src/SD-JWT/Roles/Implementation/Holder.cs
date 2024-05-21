@@ -1,10 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
-using SD_JWT.Abstractions;
 using SD_JWT.Models;
 
-namespace SD_JWT
+namespace SD_JWT.Roles.Implementation
 {
     public class Holder : IHolder
     {
@@ -14,17 +13,24 @@ namespace SD_JWT
             return new PresentationFormat(presentation);
         }
 
+        public PresentationFormat CreatePresentationFormat(SdJwtDoc sdJwtDoc, string[] disclosedPaths)
+        {
+            throw new NotImplementedException();
+        }
+
         public SdJwtDoc ReceiveCredential(string issuedSdJwt, string? issuerJwk = null, string? validJwtIssuer = null)
         {
+            SdJwtDoc doc = new SdJwtDoc(issuedSdJwt);
+            
             if (!string.IsNullOrWhiteSpace(issuerJwk) && !string.IsNullOrWhiteSpace(validJwtIssuer))
-                ValidateSdJwt(issuedSdJwt, issuerJwk, validJwtIssuer);
+                doc.AssertThatJwtSignatureIsValid(issuerJwk, validJwtIssuer);
             
             return new SdJwtDoc(issuedSdJwt);
         }
 
-        private void ValidateSdJwt(string issuedSdJwt, string issuerJwk, string validJwtIssuer)
+        private void ValidateSdJwt(string issuanceFormat, string issuerJwk, string validJwtIssuer)
         {
-            var sdJwtItems = issuedSdJwt.Split('~');
+            var sdJwtItems = issuanceFormat.Split('~');
             if (!string.IsNullOrEmpty(sdJwtItems.Last()))
                 throw new InvalidOperationException("Invalid SD-JWT - Cant contain Key Binding JWT");
 
@@ -32,12 +38,12 @@ namespace SD_JWT
             IsIssuerSignedJwtValid(issuerSignedJwt, issuerJwk, validJwtIssuer);
 
             //TODO: Use _sd_alg to hash and verify the digests
-            var issuerSignedJwtPayload = JObject.Parse(Base64UrlEncoder.Decode(issuerSignedJwt.Split('.')[1]));
+            var securedPayload = JObject.Parse(Base64UrlEncoder.Decode(issuerSignedJwt.Split('.')[1]));
             var disclosures = sdJwtItems[1..^1].Select(Disclosure.Deserialize).ToList();
-            issuerSignedJwtPayload.SelectToken("$._sd_alg")?.Parent?.Remove();
-            var plainJwt = ValidateDisclosures(issuerSignedJwtPayload, disclosures, new List<string>());
+            securedPayload.SelectToken("$._sd_alg")?.Parent?.Remove();
+            var unsecuredPayload = ValidateDisclosures(securedPayload, disclosures, new List<string>());
 
-            if (!VerifyJwtValidityClaims(plainJwt))
+            if (!VerifyJwtValidityClaims(unsecuredPayload))
                 throw new InvalidOperationException("Invalid SD-JWT - Necessary Validation Claims missing");
         }
 
@@ -50,9 +56,9 @@ namespace SD_JWT
             return !(iss == null | iat == null | vct == null);
         }
 
-        private JObject ValidateDisclosures(JObject issuerSignedJwtPayload, List<Disclosure> disclosures, List<string> processedDigests)
+        private JObject ValidateDisclosures(JObject securedPayload, List<Disclosure> disclosures, List<string> processedDigests)
         {
-            var embeddedSdDigests = issuerSignedJwtPayload.SelectTokens("$.._sd").FirstOrDefault();
+            var embeddedSdDigests = securedPayload.SelectTokens("$.._sd").FirstOrDefault();
             if (embeddedSdDigests != null)
             {
                 foreach (var sdDigest in embeddedSdDigests.ToList())
@@ -76,10 +82,10 @@ namespace SD_JWT
                 }
 
                 embeddedSdDigests.Parent?.Remove();
-                ValidateDisclosures(issuerSignedJwtPayload, disclosures, processedDigests);
+                ValidateDisclosures(securedPayload, disclosures, processedDigests);
             }
 
-            var embeddedArrayDigests = issuerSignedJwtPayload.SelectTokens("$..['...']").ToList();
+            var embeddedArrayDigests = securedPayload.SelectTokens("$..['...']").ToList();
             if (embeddedArrayDigests.Count > 0)
             {
                 foreach (var arrayDigests in embeddedArrayDigests)
@@ -96,38 +102,38 @@ namespace SD_JWT
                         arrayDigests.Parent?.Parent?.Replace(matchingDisclosure.Value.ToString());
                 }
             
-                ValidateDisclosures(issuerSignedJwtPayload, disclosures, processedDigests);
+                ValidateDisclosures(securedPayload, disclosures, processedDigests);
             }
             
-            return issuerSignedJwtPayload;
+            return securedPayload;
         }
 
-        private void IsIssuerSignedJwtValid(string issuerSignedJwt, string jwkJson, string validJwtIssuer)
+        private void IsIssuerSignedJwtValid(string issuanceFormat, string issuerJwk, string expectedIssuer)
         {
             var jwtHandler = new JwtSecurityTokenHandler();
             
-            var jwtPayload = Base64UrlEncoder.Decode(issuerSignedJwt.Split('.')[1]);
+            var jwtPayload = Base64UrlEncoder.Decode(issuanceFormat.Split('.')[1]);
             var exp = JObject.Parse(jwtPayload).SelectToken("exp");
             
             var validationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
-                ValidIssuer = validJwtIssuer,
+                ValidIssuer = expectedIssuer,
                 ValidateAudience = false,
                 ValidateLifetime =  exp != null,
                 ValidateIssuerSigningKey = true,
                 ValidTypes = new string[] {"vc+sd-jwt"},
                 ValidAlgorithms = new string[] {"ES256"},
-                IssuerSigningKey = JsonWebKey.Create(jwkJson)
+                IssuerSigningKey = JsonWebKey.Create(issuerJwk)
             };
 
             try
             {
-                jwtHandler.ValidateToken(issuerSignedJwt, validationParameters, out _);
+                jwtHandler.ValidateToken(issuanceFormat, validationParameters, out var result);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new InvalidOperationException("Invalid SD-JWT - Issuer Signed Jwt invalid");
+                throw new InvalidOperationException("Invalid SD-JWT - Issuer Signed Jwt invalid", ex);
             }
         }
     }
