@@ -21,6 +21,16 @@ public class Disclosure
     public string Base64UrlEncoded => _base64UrlEncoded ??= Serialize();
 
     private string? _base64UrlEncoded;
+    
+    public static bool operator ==(Disclosure left, Disclosure right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(Disclosure left, Disclosure right)
+    {
+        return !(left == right);
+    }
 
     public Disclosure(string? name, object value)
     {
@@ -82,6 +92,8 @@ public class Disclosure
         return obj is Disclosure disclosure && Base64UrlEncoded == disclosure.Base64UrlEncoded;
     }
     
+    // Overwrite the == operator with equals
+
     private byte[] ComputeDigest(string input, SdAlg hashAlgorithm = SdAlg.SHA256)
     {
         switch (hashAlgorithm)
