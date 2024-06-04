@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
+#pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 
 namespace SD_JWT.Models;
 
@@ -16,6 +17,8 @@ public class Disclosure
     public object Value;
 
     public string? Path { get; internal set; }
+    
+    public string Base64UrlEncoded => _base64UrlEncoded ??= Serialize();
 
     private string? _base64UrlEncoded;
 
@@ -71,6 +74,12 @@ public class Disclosure
     {
         var hashValue = _base64UrlEncoded != null ? ComputeDigest(_base64UrlEncoded) : ComputeDigest(Serialize());
         return Base64UrlEncoder.Encode(hashValue);
+    }
+    
+    // Overwrite equality comparer to compare the base64url encoded values of two disclosures
+    public override bool Equals(object? obj)
+    {
+        return obj is Disclosure disclosure && Base64UrlEncoded == disclosure.Base64UrlEncoded;
     }
     
     private byte[] ComputeDigest(string input, SdAlg hashAlgorithm = SdAlg.SHA256)
