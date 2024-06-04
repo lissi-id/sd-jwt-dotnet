@@ -43,7 +43,7 @@ public class SdJwtDoc
         IssuerSignedJwt = sdJwtItems.First();
         SecuredPayload = JObject.Parse(Base64UrlEncoder.Decode(sdJwtItems.First().Split('.')[1]));
         Disclosures = sdJwtItems[1..].Select(Disclosure.Deserialize).ToImmutableList();
-        UnsecuredPayload = DecodeSecuredPayload((JObject)SecuredPayload.DeepClone(), Disclosures.ToList());
+        (UnsecuredPayload, Disclosures) = DecodeSecuredPayload((JObject)SecuredPayload.DeepClone(), Disclosures.ToList());
     }
     
     public void AssertThatJwtSignatureIsValid(string issuerJwk, string expectedIssuer)
@@ -72,7 +72,7 @@ public class SdJwtDoc
         }
     }
     
-    private JObject DecodeSecuredPayload(JObject securedPayload, List<Disclosure> disclosures)
+    private (JObject, ImmutableList<Disclosure> )DecodeSecuredPayload(JObject securedPayload, List<Disclosure> disclosures)
     {
         AssertThatRequiredClaimsArePresent(securedPayload);
         
@@ -80,13 +80,13 @@ public class SdJwtDoc
                        ?? throw new InvalidOperationException("Invalid SD-JWT - Missing _sd_alg");
         securedPayload.SelectToken("$._sd_alg")?.Parent?.Remove();
         
-        var unsecuredPayload = sdAlg switch
+        var (unsecuredPayload, validDisclosures) = sdAlg switch
         {
             "sha-256" => ValidateDisclosures(securedPayload, disclosures, new List<string>(), SdAlg.SHA256),
             _ => throw new InvalidOperationException("Invalid SD-JWT - Unsupported _sd_alg")
         };
 
-        return unsecuredPayload;
+        return (unsecuredPayload, validDisclosures.ToImmutableList());
     }
 
     private void AssertThatRequiredClaimsArePresent(JObject plainSdJwt)
@@ -99,12 +99,12 @@ public class SdJwtDoc
             throw new InvalidOperationException("Invalid SD-JWT - Necessary Validation Claims missing");
     }
 
-    private JObject ValidateDisclosures(JObject securedPayload, List<Disclosure> disclosures, List<string> processedDigests, SdAlg hashAlgorithm)
+    private (JObject, List<Disclosure>) ValidateDisclosures(JObject securedPayload, List<Disclosure> disclosures, List<string> processedDigests, SdAlg hashAlgorithm)
     {
         var embeddedSdDigests = securedPayload.SelectTokens("$.._sd").FirstOrDefault();
         if (embeddedSdDigests != null)
         {
-            foreach (var token in embeddedSdDigests.ToList())
+            foreach (var token in embeddedSdDigests.ToList()) // this is always a single item
             {
                 if (processedDigests.Any(processedDigest => processedDigest == token.ToString()))
                     throw new InvalidOperationException("Invalid SD-JWT - Digests must be unique");
@@ -119,9 +119,11 @@ public class SdJwtDoc
 
                 var parent = embeddedSdDigests.Parent?.Parent;
                 if (parent == null || parent.SelectToken(matchingDisclosure.Name) != null)
-                    throw new InvalidOperationException("Invalid SD-JWT - Disclosure name already exists in the payload");
+                    throw new InvalidOperationException($"Invalid SD-JWT - Disclosure {matchingDisclosure.Name} already exists in the payload");
             
                 parent.Add(new JProperty(matchingDisclosure.Name, matchingDisclosure.Value));
+                
+                matchingDisclosure.Path = $"{parent.Path}.{matchingDisclosure.Name}".TrimStart('.');
             }
 
             embeddedSdDigests.Parent?.Remove();
@@ -142,13 +144,15 @@ public class SdJwtDoc
                 if (matchingDisclosure == null)
                     arrayDigests.Parent?.Parent?.Remove();
                 else
+                {
+                    matchingDisclosure.Path = arrayDigests.Parent?.Parent?.Path;
                     arrayDigests.Parent?.Parent?.Replace(matchingDisclosure.Value.ToString());
+                }
             }
-        
             ValidateDisclosures(securedPayload, disclosures, processedDigests, hashAlgorithm);
         }
         
-        return securedPayload;
+        return (securedPayload, disclosures);
     }
 }
 

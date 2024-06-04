@@ -1,4 +1,3 @@
-using System.Buffers.Text;
 using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
@@ -15,6 +14,8 @@ public class Disclosure
     public string? Name;
     
     public object Value;
+
+    public string? Path { get; internal set; }
 
     private string? _base64UrlEncoded;
 
