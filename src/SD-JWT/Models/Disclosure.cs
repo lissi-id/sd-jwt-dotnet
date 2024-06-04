@@ -24,6 +24,10 @@ public class Disclosure
     
     public static bool operator ==(Disclosure left, Disclosure right)
     {
+        if (ReferenceEquals(left, null) || ReferenceEquals(right, null))
+        {
+            return false;
+        }
         return left.Equals(right);
     }
 
@@ -91,8 +95,6 @@ public class Disclosure
     {
         return obj is Disclosure disclosure && Base64UrlEncoded == disclosure.Base64UrlEncoded;
     }
-    
-    // Overwrite the == operator with equals
 
     private byte[] ComputeDigest(string input, SdAlg hashAlgorithm = SdAlg.SHA256)
     {
