@@ -21,20 +21,6 @@ public class Disclosure
     public string Base64UrlEncoded => _base64UrlEncoded ??= Serialize();
 
     private string? _base64UrlEncoded;
-    
-    public static bool operator ==(Disclosure left, Disclosure right)
-    {
-        if (ReferenceEquals(left, null) || ReferenceEquals(right, null))
-        {
-            return false;
-        }
-        return left.Equals(right);
-    }
-
-    public static bool operator !=(Disclosure left, Disclosure right)
-    {
-        return !(left == right);
-    }
 
     public Disclosure(string? name, object value)
     {
@@ -88,12 +74,6 @@ public class Disclosure
     {
         var hashValue = _base64UrlEncoded != null ? ComputeDigest(_base64UrlEncoded) : ComputeDigest(Serialize());
         return Base64UrlEncoder.Encode(hashValue);
-    }
-    
-    // Overwrite equality comparer to compare the base64url encoded values of two disclosures
-    public override bool Equals(object? obj)
-    {
-        return obj is Disclosure disclosure && Base64UrlEncoded == disclosure.Base64UrlEncoded;
     }
 
     private byte[] ComputeDigest(string input, SdAlg hashAlgorithm = SdAlg.SHA256)
