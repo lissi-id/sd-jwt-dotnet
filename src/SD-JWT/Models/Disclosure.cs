@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 #pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 
@@ -62,7 +62,7 @@ public class Disclosure
         if (_base64UrlEncoded != null) return _base64UrlEncoded;
         
         var array = new[] { Salt, Name, Value };
-        var json = JsonSerializer.SerializeToUtf8Bytes(array);
+        var json = JsonConvert.SerializeObject(array);
         return Base64UrlEncoder.Encode(json);
     }
 
@@ -72,6 +72,9 @@ public class Disclosure
     /// <returns>The base64url encoded hash of the base64url encoded disclosure json object</returns>
     public string GetDigest(SdAlg hashAlgorithm = SdAlg.SHA256)
     {
+        if(hashAlgorithm != SdAlg.SHA256) 
+            throw new InvalidOperationException("Unsupported hash algorithm");
+        
         var hashValue = _base64UrlEncoded != null ? ComputeDigest(_base64UrlEncoded) : ComputeDigest(Serialize());
         return Base64UrlEncoder.Encode(hashValue);
     }

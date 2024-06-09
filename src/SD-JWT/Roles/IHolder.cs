@@ -7,7 +7,5 @@ namespace SD_JWT.Roles
         public SdJwtDoc ReceiveCredential(string issuedSdJwt, string? issuerJwk = null, string? validJwtIssuer = null);
 
         public PresentationFormat CreatePresentationFormat(string issuerSignedJwt, Disclosure[] disclosures);
-
-        public PresentationFormat CreatePresentationFormat(SdJwtDoc sdJwtDoc, string[] disclosedPaths);
     }
 }
