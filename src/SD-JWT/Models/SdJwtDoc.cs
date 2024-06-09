@@ -74,29 +74,17 @@ public class SdJwtDoc
     
     private (JObject, ImmutableList<Disclosure> )DecodeSecuredPayload(JObject securedPayload, List<Disclosure> disclosures)
     {
-        AssertThatRequiredClaimsArePresent(securedPayload);
-        
         string sdAlg = securedPayload.SelectToken("$._sd_alg")?.Value<string>() 
                        ?? throw new InvalidOperationException("Invalid SD-JWT - Missing _sd_alg");
         securedPayload.SelectToken("$._sd_alg")?.Parent?.Remove();
         
-        var (unsecuredPayload, validDisclosures) = sdAlg switch
+        var (unsecuredPayload, validDisclosures) = sdAlg.ToLowerInvariant() switch
         {
             "sha-256" => ValidateDisclosures(securedPayload, disclosures, new List<string>(), SdAlg.SHA256),
             _ => throw new InvalidOperationException("Invalid SD-JWT - Unsupported _sd_alg")
         };
 
         return (unsecuredPayload, validDisclosures.ToImmutableList());
-    }
-
-    private void AssertThatRequiredClaimsArePresent(JObject plainSdJwt)
-    {
-        var iss = plainSdJwt.SelectToken("iss");
-        var vct = plainSdJwt.SelectToken("vct");
-        var iat = plainSdJwt.SelectToken("iat");
-        
-        if (iss == null | iat == null) 
-            throw new InvalidOperationException("Invalid SD-JWT - Necessary Validation Claims missing");
     }
 
     private (JObject, List<Disclosure>) ValidateDisclosures(JObject securedPayload, List<Disclosure> disclosures, List<string> processedDigests, SdAlg hashAlgorithm)
@@ -146,7 +134,7 @@ public class SdJwtDoc
                 else
                 {
                     matchingDisclosure.Path = arrayDigests.Parent?.Parent?.Path;
-                    arrayDigests.Parent?.Parent?.Replace(matchingDisclosure.Value.ToString());
+                    arrayDigests.Parent?.Parent?.Replace((JToken)matchingDisclosure.Value);
                 }
             }
             ValidateDisclosures(securedPayload, disclosures, processedDigests, hashAlgorithm);
