@@ -4,7 +4,7 @@ namespace SD_JWT_Tests;
 
 public class DisclosureTests
 {
-    private const string SerialisedDisclosure = "WyJfMjZiYzRMVC1hYzZxMktJNmNCVzVlcyIsImZhbWlseV9uYW1lIiwiTVx1MDBGNmJpdXMiXQ";
+    private const string SerialisedDisclosure = "WyJfMjZiYzRMVC1hYzZxMktJNmNCVzVlcyIsImZhbWlseV9uYW1lIiwiTcO2Yml1cyJd";
     private readonly Disclosure DeserialisedDisclosure = 
         new("family_name", "Möbius") { Salt = "_26bc4LT-ac6q2KI6cBW5es" };
 
@@ -30,7 +30,7 @@ public class DisclosureTests
     [Test]
     public void CanComputeHash()
     {
-        const string expectedHash = "X-iQ9cBjlRvwtSc2v6NNJiZkvm98vDKXJhS-5JHUt6k";
+        const string expectedHash = "TZjouOTrBKEwUNjNDs9yeMzBoQn8FFLPaJjRRmAtwrM";
 
         string actualHash = DeserialisedDisclosure.GetDigest();
         
