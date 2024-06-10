@@ -1,8 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
-using SD_JWT.Abstractions;
 
-namespace SD_JWT;
+namespace SD_JWT.Roles.Implementation;
 
 public class Verifier : IVerifier
 {
