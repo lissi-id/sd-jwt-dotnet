@@ -106,10 +106,10 @@ public class SdJwtDoc
                     throw new InvalidOperationException("Invalid SD-JWT - _sd and ... are reserved claim names");
 
                 var parent = embeddedSdDigests.Parent?.Parent;
-                if (parent == null || parent.SelectToken(matchingDisclosure.Name) != null)
+                if (parent == null || parent.SelectToken(matchingDisclosure.Name!) != null)
                     throw new InvalidOperationException($"Invalid SD-JWT - Disclosure {matchingDisclosure.Name} already exists in the payload");
             
-                parent.Add(new JProperty(matchingDisclosure.Name, matchingDisclosure.Value));
+                parent.Add(new JProperty(matchingDisclosure.Name!, matchingDisclosure.Value));
                 
                 matchingDisclosure.Path = $"{parent.Path}.{matchingDisclosure.Name}".TrimStart('.');
             }
