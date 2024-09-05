@@ -74,20 +74,23 @@ public class SdJwtDoc
     
     private (JObject, ImmutableList<Disclosure> )DecodeSecuredPayload(JObject securedPayload, List<Disclosure> disclosures)
     {
-        string sdAlg = securedPayload.SelectToken("$._sd_alg")?.Value<string>() 
-                       ?? throw new InvalidOperationException("Invalid SD-JWT - Missing _sd_alg");
+        var sdAlg = securedPayload.SelectToken("$._sd_alg")?.Value<string?>();
         securedPayload.SelectToken("$._sd_alg")?.Parent?.Remove();
+
+        if (!disclosures.IsNullOrEmpty() && sdAlg == null)
+            throw new InvalidOperationException("Invalid SD-JWT - Missing _sd_alg");
         
-        var (unsecuredPayload, validDisclosures) = sdAlg.ToLowerInvariant() switch
+        var (unsecuredPayload, validDisclosures) = sdAlg?.ToLowerInvariant() switch
         {
-            "sha-256" => ValidateDisclosures(securedPayload, disclosures, new List<string>(), SdAlg.SHA256),
+            "sha-256" => ValidateDisclosures(securedPayload, disclosures, [], SdAlg.SHA256),
+            null => ValidateDisclosures(securedPayload, disclosures, [], null),
             _ => throw new InvalidOperationException("Invalid SD-JWT - Unsupported _sd_alg")
         };
 
         return (unsecuredPayload, validDisclosures.ToImmutableList());
     }
 
-    private (JObject, List<Disclosure>) ValidateDisclosures(JObject securedPayload, List<Disclosure> disclosures, List<string> processedDigests, SdAlg hashAlgorithm)
+    private (JObject, List<Disclosure>) ValidateDisclosures(JObject securedPayload, List<Disclosure> disclosures, List<string> processedDigests, SdAlg? hashAlgorithm)
     {
         var embeddedSdDigests = securedPayload.SelectTokens("$.._sd").FirstOrDefault();
         if (embeddedSdDigests != null)

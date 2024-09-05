@@ -10,6 +10,7 @@ public class SdJwtDocTests
     [TestCase(typeof(Example2))]
     [TestCase(typeof(Example3))]
     [TestCase(typeof(Example4A))]
+    [TestCase(typeof(Example5))]
     [Test]
     public void CanParseExampleSdJwt(Type example)
     {
