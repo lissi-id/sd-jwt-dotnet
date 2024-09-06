@@ -72,12 +72,12 @@ public class SdJwtDoc
         }
     }
     
-    private (JObject, ImmutableList<Disclosure> )DecodeSecuredPayload(JObject securedPayload, List<Disclosure> disclosures)
+    private (JObject, ImmutableList<Disclosure>) DecodeSecuredPayload(JObject securedPayload, List<Disclosure> disclosures)
     {
         var sdAlg = securedPayload.SelectToken("$._sd_alg")?.Value<string?>();
         securedPayload.SelectToken("$._sd_alg")?.Parent?.Remove();
 
-        if (!disclosures.IsNullOrEmpty() && sdAlg == null)
+        if (disclosures.Any() && sdAlg == null)
             throw new InvalidOperationException("Invalid SD-JWT - Missing _sd_alg");
         
         var (unsecuredPayload, validDisclosures) = sdAlg?.ToLowerInvariant() switch
@@ -95,7 +95,7 @@ public class SdJwtDoc
         var embeddedSdDigests = securedPayload.SelectTokens("$.._sd").FirstOrDefault();
         if (embeddedSdDigests != null)
         {
-            foreach (var token in embeddedSdDigests.ToList()) // this is always a single item
+            foreach (var token in embeddedSdDigests.ToList()) // this is always a single item 
             {
                 if (processedDigests.Any(processedDigest => processedDigest == token.ToString()))
                     throw new InvalidOperationException("Invalid SD-JWT - Digests must be unique");
