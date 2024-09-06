@@ -74,13 +74,16 @@ public class SdJwtDoc
     
     private (JObject, ImmutableList<Disclosure> )DecodeSecuredPayload(JObject securedPayload, List<Disclosure> disclosures)
     {
-        string sdAlg = securedPayload.SelectToken("$._sd_alg")?.Value<string>() 
-                       ?? throw new InvalidOperationException("Invalid SD-JWT - Missing _sd_alg");
+        var sdAlg = securedPayload.SelectToken("$._sd_alg")?.Value<string?>();
         securedPayload.SelectToken("$._sd_alg")?.Parent?.Remove();
+
+        if (!disclosures.IsNullOrEmpty() && sdAlg == null)
+            throw new InvalidOperationException("Invalid SD-JWT - Missing _sd_alg");
         
-        var (unsecuredPayload, validDisclosures) = sdAlg.ToLowerInvariant() switch
+        var (unsecuredPayload, validDisclosures) = sdAlg?.ToLowerInvariant() switch
         {
-            "sha-256" => ValidateDisclosures(securedPayload, disclosures, new List<string>(), SdAlg.SHA256),
+            "sha-256" => ValidateDisclosures(securedPayload, disclosures, [], SdAlg.SHA256),
+            null => (securedPayload, disclosures),
             _ => throw new InvalidOperationException("Invalid SD-JWT - Unsupported _sd_alg")
         };
 
@@ -98,7 +101,7 @@ public class SdJwtDoc
                     throw new InvalidOperationException("Invalid SD-JWT - Digests must be unique");
                 processedDigests.Add(token.ToString());
                 
-                var matchingDisclosure = disclosures.Find(disclosure => disclosure.GetDigest() == token.ToString());
+                var matchingDisclosure = disclosures.Find(disclosure => disclosure.GetDigest(hashAlgorithm) == token.ToString());
                 if (matchingDisclosure == null)
                     continue;
                 
@@ -127,7 +130,7 @@ public class SdJwtDoc
                     throw new InvalidOperationException("Invalid SD-JWT - Digests must be unique");
                 processedDigests.Add(arrayDigests.ToString());
                 
-                var matchingDisclosure = disclosures.Find(disclosure => disclosure.GetDigest() == arrayDigests.ToString());
+                var matchingDisclosure = disclosures.Find(disclosure => disclosure.GetDigest(hashAlgorithm) == arrayDigests.ToString());
 
                 if (matchingDisclosure == null)
                     arrayDigests.Parent?.Parent?.Remove();
