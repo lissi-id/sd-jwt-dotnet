@@ -95,7 +95,7 @@ public class SdJwtDoc
         var embeddedSdDigests = securedPayload.SelectTokens("$.._sd").FirstOrDefault();
         if (embeddedSdDigests != null)
         {
-            foreach (var token in embeddedSdDigests.ToList()) // this is always a single item
+            foreach (var token in embeddedSdDigests.ToList()) // this is always a single item 
             {
                 if (processedDigests.Any(processedDigest => processedDigest == token.ToString()))
                     throw new InvalidOperationException("Invalid SD-JWT - Digests must be unique");
