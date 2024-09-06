@@ -83,14 +83,14 @@ public class SdJwtDoc
         var (unsecuredPayload, validDisclosures) = sdAlg?.ToLowerInvariant() switch
         {
             "sha-256" => ValidateDisclosures(securedPayload, disclosures, [], SdAlg.SHA256),
-            null => ValidateDisclosures(securedPayload, disclosures, [], null),
+            null => (securedPayload, disclosures),
             _ => throw new InvalidOperationException("Invalid SD-JWT - Unsupported _sd_alg")
         };
 
         return (unsecuredPayload, validDisclosures.ToImmutableList());
     }
 
-    private (JObject, List<Disclosure>) ValidateDisclosures(JObject securedPayload, List<Disclosure> disclosures, List<string> processedDigests, SdAlg? hashAlgorithm)
+    private (JObject, List<Disclosure>) ValidateDisclosures(JObject securedPayload, List<Disclosure> disclosures, List<string> processedDigests, SdAlg hashAlgorithm)
     {
         var embeddedSdDigests = securedPayload.SelectTokens("$.._sd").FirstOrDefault();
         if (embeddedSdDigests != null)
@@ -101,7 +101,7 @@ public class SdJwtDoc
                     throw new InvalidOperationException("Invalid SD-JWT - Digests must be unique");
                 processedDigests.Add(token.ToString());
                 
-                var matchingDisclosure = disclosures.Find(disclosure => disclosure.GetDigest() == token.ToString());
+                var matchingDisclosure = disclosures.Find(disclosure => disclosure.GetDigest(hashAlgorithm) == token.ToString());
                 if (matchingDisclosure == null)
                     continue;
                 
@@ -130,7 +130,7 @@ public class SdJwtDoc
                     throw new InvalidOperationException("Invalid SD-JWT - Digests must be unique");
                 processedDigests.Add(arrayDigests.ToString());
                 
-                var matchingDisclosure = disclosures.Find(disclosure => disclosure.GetDigest() == arrayDigests.ToString());
+                var matchingDisclosure = disclosures.Find(disclosure => disclosure.GetDigest(hashAlgorithm) == arrayDigests.ToString());
 
                 if (matchingDisclosure == null)
                     arrayDigests.Parent?.Parent?.Remove();
