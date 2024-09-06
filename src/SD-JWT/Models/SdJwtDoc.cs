@@ -72,12 +72,12 @@ public class SdJwtDoc
         }
     }
     
-    private (JObject, ImmutableList<Disclosure> )DecodeSecuredPayload(JObject securedPayload, List<Disclosure> disclosures)
+    private (JObject, ImmutableList<Disclosure>) DecodeSecuredPayload(JObject securedPayload, List<Disclosure> disclosures)
     {
         var sdAlg = securedPayload.SelectToken("$._sd_alg")?.Value<string?>();
         securedPayload.SelectToken("$._sd_alg")?.Parent?.Remove();
 
-        if (!disclosures.IsNullOrEmpty() && sdAlg == null)
+        if (disclosures.Any() && sdAlg == null)
             throw new InvalidOperationException("Invalid SD-JWT - Missing _sd_alg");
         
         var (unsecuredPayload, validDisclosures) = sdAlg?.ToLowerInvariant() switch
