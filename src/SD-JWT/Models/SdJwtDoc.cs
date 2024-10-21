@@ -77,13 +77,12 @@ public class SdJwtDoc
         var sdAlg = securedPayload.SelectToken("$._sd_alg")?.Value<string?>();
         securedPayload.SelectToken("$._sd_alg")?.Parent?.Remove();
 
-        if (disclosures.Any() && sdAlg == null)
-            throw new InvalidOperationException("Invalid SD-JWT - Missing _sd_alg");
-        
         var (unsecuredPayload, validDisclosures) = sdAlg?.ToLowerInvariant() switch
         {
             "sha-256" => ValidateDisclosures(securedPayload, disclosures, [], SdAlg.SHA256),
-            null => (securedPayload, disclosures),
+            null => disclosures.Any() 
+                ? ValidateDisclosures(securedPayload, disclosures, [], SdAlg.SHA256)
+                : (securedPayload, disclosures),
             _ => throw new InvalidOperationException("Invalid SD-JWT - Unsupported _sd_alg")
         };
 
